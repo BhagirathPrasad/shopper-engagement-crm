@@ -1,0 +1,12 @@
+{
+  "name": "xeno",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\" \"node channel-service/src/index.js\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

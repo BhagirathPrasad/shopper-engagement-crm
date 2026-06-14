@@ -47,7 +47,7 @@ app.post('/api/dispatch', async (req, res) => {
 
       // Callback to CRM Service via webhook
       try {
-        await axios.post('http://localhost:5000/api/webhooks/delivery', {
+        await axios.post('http://localhost:5050/api/webhooks/delivery', {
           communicationId: _id,
           status,
           timestamp: new Date()

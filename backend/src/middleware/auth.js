@@ -1,24 +1,41 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
+// Cached mock user to avoid a DB hit on every request
+let _cachedMockUser = null;
+
 export const protect = async (req, res, next) => {
-  // Mini CRM Mode: Bypass JWT Auth and inject a mock user
+  // Demo Mode: Bypass JWT Auth and inject a persisted mock user
   try {
+    if (_cachedMockUser) {
+      req.user = _cachedMockUser;
+      return next();
+    }
+
     let user = await User.findOne({ email: 'admin@xeno.ai' });
     if (!user) {
-      // Create fallback dummy user if missing
       user = await User.create({
         name: 'Admin User',
         email: 'admin@xeno.ai',
-        password: 'dummy_password', // Doesn't matter, auth is bypassed
-        role: 'admin'
+        password: 'XenoAdmin@2025!', // hashed by pre-save hook
+        role: 'Admin',
       });
     }
+    _cachedMockUser = user;
     req.user = user;
     next();
   } catch (error) {
-    console.error('Error in mock auth:', error);
-    next(new Error('Auth bypass failed'));
+    // If user creation fails (e.g. race condition duplicate), try findOne again
+    try {
+      const user = await User.findOne({ email: 'admin@xeno.ai' });
+      if (user) {
+        _cachedMockUser = user;
+        req.user = user;
+        return next();
+      }
+    } catch (_) {}
+    console.error('Auth middleware error:', error.message);
+    next(new Error('Auth setup failed'));
   }
 };
 

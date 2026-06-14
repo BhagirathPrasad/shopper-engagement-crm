@@ -1,7 +1,7 @@
 import Campaign from '../models/Campaign.js';
 import Segment from '../models/Segment.js';
 import Communication from '../models/Communication.js';
-import { campaignQueue } from '../queues/campaignQueue.js';
+import { enqueueCampaign } from '../queues/campaignQueue.js';
 
 // @desc    Create a new campaign
 // @route   POST /api/campaigns
@@ -52,8 +52,8 @@ export const launchCampaign = async (req, res, next) => {
       throw new Error('Only Draft campaigns can be launched');
     }
 
-    // Add to BullMQ
-    await campaignQueue.add('execute-campaign', { campaignId: campaign._id });
+    // Enqueue via BullMQ (falls back to synchronous if Redis unavailable)
+    await enqueueCampaign(campaign._id);
     
     campaign.status = 'Scheduled';
     await campaign.save();
@@ -92,8 +92,8 @@ export const launchDirectCampaign = async (req, res, next) => {
       createdBy: req.user._id,
     });
 
-    // 3. Add to BullMQ
-    await campaignQueue.add('execute-campaign', { campaignId: campaign._id });
+    // Enqueue via BullMQ (falls back to synchronous if Redis unavailable)
+    await enqueueCampaign(campaign._id);
 
     res.json({ message: 'Campaign launched successfully', campaign });
   } catch (error) {

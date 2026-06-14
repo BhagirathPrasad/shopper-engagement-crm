@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Bot, Send, User, Rocket, AlertTriangle } from 'lucide-react';
 import api from '../lib/api';
 import { useQueryClient } from '@tanstack/react-query';
